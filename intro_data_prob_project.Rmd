@@ -1,0 +1,77 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+Make sure your data and R Markdown files are in the same directory. When loaded
+your data file will be called `brfss2013`. Delete this note when before you submit 
+your work. 
+
+```{r load-data}
+load("brfss2013.RData")
+```
+
+
+
+* * *
+
+## Part 1: Data
+
+
+* * *
+
+## Part 2: Research questions
+
+**Research quesion 1:** 
+
+**Research quesion 2:** 
+
+**Research quesion 3:** 
+
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button (green button with orange arrow) above. Make sure that your code is visible
+in the project you submit. Delete this note when before you submit your work.
+
+**Research quesion 1:**
+
+```{r}
+brfss2013_male <- brfss2013 %>% filter(sex == "Male") %>% filter(prediab1 != "NA") %>% mutate(bmi = X_bmi5 / 100)
+brfss2013_female <- brfss2013 %>% filter(sex == "Female") %>% filter(prediab1 != "NA") %>% mutate(bmi = X_bmi5 / 100)
+ggplot(brfss2013_male, aes(x = prediab1, y = bmi)) + geom_boxplot() # bmi slightly higher for prediabetes condition
+ggplot(brfss2013_female, aes(x = prediab1, y = bmi)) + geom_boxplot() # bmi slightly higher for prediabetes condition
+```
+
+**Research quesion 2:**
+
+```{r}
+brfss2013_rest <- brfss2013 %>% filter(misrstls != "NA") %>% mutate(gen_hlth = ifelse(genhlth == "Poor", "Poor", "Good"))
+ggplot(brfss2013_rest, aes(x = misrstls, fill = gen_hlth)) + geom_bar(position = "fill") # proportion of people in general good health decreases with time restless
+```
+
+
+**Research quesion 3:**
+
+```{r}
+brfss2013_bmi <- brfss2013 %>% filter(pa1min_ != "NA") %>% filter(X_bmi5 != "NA") %>% mutate(bmi = X_bmi5 / 100)
+ggplot(brfss2013_bmi, aes(x = bmi, y = log(pa1min_ + 1), colour = sex)) + geom_point() + scale_colour_brewer(palette="Set1") # as bmi increases the number of total physical activity decreases
+```
