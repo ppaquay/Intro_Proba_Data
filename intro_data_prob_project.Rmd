@@ -18,60 +18,76 @@ library(dplyr)
 
 ### Load data
 
-Make sure your data and R Markdown files are in the same directory. When loaded
-your data file will be called `brfss2013`. Delete this note when before you submit 
-your work. 
-
 ```{r load-data}
 load("brfss2013.RData")
 ```
-
 
 
 * * *
 
 ## Part 1: Data
 
+The Behavioral Risk Factor Surveillance System (BRFSS) is a United States health survey that looks at behavioral risk factors. It is run by Centers for Disease Control and Prevention (CDC) and conducted by the individual state health departments. This survey is administered by telephone and is the world's largest such survey. In 2009, the BRFSS began conducting surveys by cellular phone in addition to traditional landline telephones.
+
+The BRFSS is a cross-sectional telephone survey conducted by state health departments with technical and methodological assistance provided by CDC. In addition to all 50 states, the BRFSS is also conducted by health departments in The District of Columbia, Guam, Puerto Rico, and the U.S. Virgin Islands.
+
+### Sampling Design
+
+In order to conduct the BRFSS, states obtain samples of telephone numbers from CDC. The BRFSS uses two samples : one for landline telephone respondents and one for cellular telephone respondents. Since landline telephones are often shared among persons living within a residence, household sampling is used in the landline sample. Household sampling requires interviewers to collect information on the number of adults living within a residence and then select randomly from all eligible adults.
+
+#### The Landline Sample
+
+Disproportionate stratified sampling (DSS^[Disproportionate stratification is a type of stratified sampling. With disproportionate stratification, the sample size of each stratum does not have to be proportionate to the population size of the stratum. This means that two or more strata will have different sampling fractions .]) has been used for the landline sample since 2003. DSS draws telephone numbers from two strata (lists) that are based on the presumed density of known telephone household numbers. In this design, telephone numbers are classified into strata that are either high density (listed 1+ block telephone numbers) or medium density (not listed 1+ block telephone numbers) to yield residential telephone numbers.
+
+#### The Cellular Telephone Sample
+
+The cellular telephone sample is randomly generated from a sampling frame of confirmed cellular area code and prefix combinations. Cellular telephone respondents are randomly selected with each having equal probability of selection. 
+
+### Scope of Inference
+
+From what is described in the points above, it seems pretty clear that the BRFSS survey is actually an observational retrosepctive study that uses a stratified sampling design based on random digit dialing methods to select a representative sample from each state's non-institutionalized residents. In this sample design, each state begins with a single stratum. To provide adequate sample sizes for smaller geographically defined populations of interest, however, many states sample disproportionately from strata that correspond to sub-state regions.
+
+#### Generalizability
+
+As it is, the BRFSS survey should be generalizable to all non-institutionalized adults (18 years of age and older) residing in the U.S.
+
+#### Causality
+
+As is well-known, making causal conclusions based on observational data is not recommended. Observational studies are only sufficient to show associations.
 
 * * *
 
 ## Part 2: Research questions
 
-**Research quesion 1:** 
+**Research question 1:** Is there an association between general health (*genhlth* variable) and the frequency of feeling restless in the past 30 days (*misrstls* variable) ?
+)
 
-**Research quesion 2:** 
+**Research question 2:** Is there an association between prediabetes condition (*prediab1* variable) and BMI (*X_bmi5* variable) for male and female ?
 
-**Research quesion 3:** 
+**Research question 3:** Is there an association between BMI (*X_bmi5* variable) and the minutes of total physical activity per week (*pa1min_* variable) for male and females ?
 
 
 * * *
 
 ## Part 3: Exploratory data analysis
 
-NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
-button (green button with orange arrow) above. Make sure that your code is visible
-in the project you submit. Delete this note when before you submit your work.
-
-**Research quesion 1:**
+**Research question 1:**
 
 ```{r}
-brfss2013_male <- brfss2013 %>% filter(sex == "Male") %>% filter(prediab1 != "NA") %>% mutate(bmi = X_bmi5 / 100)
-brfss2013_female <- brfss2013 %>% filter(sex == "Female") %>% filter(prediab1 != "NA") %>% mutate(bmi = X_bmi5 / 100)
-ggplot(brfss2013_male, aes(x = prediab1, y = bmi)) + geom_boxplot() # bmi slightly higher for prediabetes condition
-ggplot(brfss2013_female, aes(x = prediab1, y = bmi)) + geom_boxplot() # bmi slightly higher for prediabetes condition
+brfss2013_rest_genhlth <- brfss2013 %>% filter(misrstls != "NA") %>% mutate(gen_hlth = ifelse(genhlth == "Poor", "Poor", "Good"))
+ggplot(brfss2013_rest_genhlth, aes(x = misrstls, fill = gen_hlth)) + geom_bar(position = "fill") + scale_fill_discrete(name = "General Health") + xlab("Frequency of restless days") + ylab("Proportion") # proportion of people in general good health decreases with time restless
 ```
 
-**Research quesion 2:**
+**Research question 2:**
 
 ```{r}
-brfss2013_rest <- brfss2013 %>% filter(misrstls != "NA") %>% mutate(gen_hlth = ifelse(genhlth == "Poor", "Poor", "Good"))
-ggplot(brfss2013_rest, aes(x = misrstls, fill = gen_hlth)) + geom_bar(position = "fill") # proportion of people in general good health decreases with time restless
+brfss2013_prediab_bmi <- brfss2013 %>% filter(prediab1 != "NA") %>% filter(X_bmi5 != "NA") %>% mutate(bmi = X_bmi5 / 100)
+ggplot(brfss2013_prediab_bmi, aes(x = prediab1, y = bmi)) + geom_boxplot() + facet_wrap(~sex) + xlab("Prediabetes condition") + ylab("BMI") # bmi slightly higher for prediabetes condition
 ```
 
-
-**Research quesion 3:**
+**Research question 3:**
 
 ```{r}
-brfss2013_bmi <- brfss2013 %>% filter(pa1min_ != "NA") %>% filter(X_bmi5 != "NA") %>% mutate(bmi = X_bmi5 / 100)
-ggplot(brfss2013_bmi, aes(x = bmi, y = log(pa1min_ + 1), colour = sex)) + geom_point() + scale_colour_brewer(palette="Set1") # as bmi increases the number of total physical activity decreases
+brfss2013_pa_bmi <- brfss2013 %>% filter(pa1min_ != "NA") %>% filter(X_bmi5 != "NA") %>% mutate(bmi = X_bmi5 / 100)
+ggplot(brfss2013_pa_bmi, aes(x = bmi, y = log(pa1min_ + 1), colour = sex)) + geom_point(shape = 19, alpha = 1/4) + geom_smooth(method = lm, se = FALSE) + scale_colour_discrete(name = "Sex") + xlab("BMI") + ylab("Minutes of physical activity per week (Log)") # as bmi increases the number of total physical activity decreases
 ```
