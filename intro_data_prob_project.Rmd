@@ -81,20 +81,20 @@ As in the previous research question, an actual association between BMI and phys
 
 ```{r}
 brfss2013_rest_genhlth <- brfss2013 %>% filter(misrstls != "NA") %>% mutate(gen_hlth = ifelse(genhlth == "Poor", "Poor", "Good")) %>% filter(gen_hlth != "NA")
-ggplot(brfss2013_rest_genhlth, aes(x = misrstls, fill = gen_hlth)) + geom_bar(position = "fill") + scale_fill_discrete(name = "General Health") + xlab("Frequency of restless days") + ylab("Proportion") # proportion of people in general good health decreases with time restless
+ggplot(brfss2013_rest_genhlth, aes(x = misrstls, fill = gen_hlth)) + geom_bar(position = "fill") + scale_fill_discrete(name = "General Health") + xlab("Frequency of restless days") + ylab("Proportion")
 ```
 
 ```{r}
 brfss2013_rest_genhlth %>% group_by(misrstls) %>% summarise(prop_poor_hlth = sum(gen_hlth == "Poor") / n())
 ```
 
-From the statistics above (*prop_poor_hlth* : proportion of people in poor health), we may clearly see that the proportion of people feeling in poor general health is increasing with the number of restless days in the previous month.
+From the statistics above (*prop_poor_hlth* : proportion of people in poor health), we may clearly see that the proportion of people feeling in poor general health increases with the number of restless days in the previous month.
 
 **Research question 2:**
 
 ```{r}
 brfss2013_prediab_bmi <- brfss2013 %>% filter(prediab1 != "NA") %>% filter(X_bmi5 != "NA") %>% mutate(bmi = X_bmi5 / 100)
-ggplot(brfss2013_prediab_bmi, aes(x = prediab1, y = bmi)) + geom_boxplot() + facet_wrap(~sex) + xlab("Prediabetes condition") + ylab("BMI") # bmi slightly higher for prediabetes condition
+ggplot(brfss2013_prediab_bmi, aes(x = prediab1, y = bmi)) + geom_boxplot() + facet_wrap(~sex) + xlab("Prediabetes condition") + ylab("BMI")
 ```
 
 ```{r}
@@ -107,7 +107,7 @@ The statistics above (*median_bmi* : median of BMI, *iqr_bmi* : interquartile ra
 
 ```{r}
 brfss2013_pa_bmi <- brfss2013 %>% filter(pa1min_ != "NA") %>% filter(X_bmi5 != "NA") %>% mutate(bmi = X_bmi5 / 100)
-ggplot(brfss2013_pa_bmi, aes(x = bmi, y = log(pa1min_ + 1), colour = sex)) + geom_point(shape = 19, alpha = 1/4) + geom_smooth(method = lm, se = FALSE) + scale_colour_discrete(name = "Sex") + xlab("BMI") + ylab("Minutes of physical activity per week (Log)") # as bmi increases the number of total physical activity decreases
+ggplot(brfss2013_pa_bmi, aes(x = bmi, y = log(pa1min_ + 1), colour = sex)) + geom_point(shape = 19, alpha = 1/4) + geom_smooth(method = lm, se = FALSE) + scale_colour_discrete(name = "Sex") + xlab("BMI") + ylab("Minutes of physical activity per week (Log)")
 ```
 
 ```{r}
