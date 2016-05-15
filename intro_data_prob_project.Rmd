@@ -60,11 +60,17 @@ As is well-known, making causal conclusions based on observational data is not r
 ## Part 2: Research questions
 
 **Research question 1:** Is there an association between general health (*genhlth* variable) and the frequency of feeling restless in the past 30 days (*misrstls* variable) ?
-)
 
-**Research question 2:** Is there an association between prediabetes condition (*prediab1* variable) and BMI (*X_bmi5* variable) for male and female ?
+It would be interesting to know if the sentiment of feeling well-rested or restless is linked in any way with the general health of a person.
 
-**Research question 3:** Is there an association between BMI (*X_bmi5* variable) and the minutes of total physical activity per week (*pa1min_* variable) for male and females ?
+
+**Research question 2:** Is there an association between prediabetes condition (*prediab1* variable) and BMI (*X_bmi5* variable) for males and females (*sex* variable) ?
+
+An actual association between prediabetes and BMI might provide us with ways to better understand this more and more common disease in our western societies.
+
+**Research question 3:** Is there an association between BMI (*X_bmi5* variable) and the minutes of total physical activity per week (*pa1min_* variable) for males and females (*sex* variable) ?
+
+As in the previous research question, an actual association between BMI and physical activity might provide us with means to better deal with this disease.
 
 
 * * *
@@ -74,9 +80,15 @@ As is well-known, making causal conclusions based on observational data is not r
 **Research question 1:**
 
 ```{r}
-brfss2013_rest_genhlth <- brfss2013 %>% filter(misrstls != "NA") %>% mutate(gen_hlth = ifelse(genhlth == "Poor", "Poor", "Good"))
+brfss2013_rest_genhlth <- brfss2013 %>% filter(misrstls != "NA") %>% mutate(gen_hlth = ifelse(genhlth == "Poor", "Poor", "Good")) %>% filter(gen_hlth != "NA")
 ggplot(brfss2013_rest_genhlth, aes(x = misrstls, fill = gen_hlth)) + geom_bar(position = "fill") + scale_fill_discrete(name = "General Health") + xlab("Frequency of restless days") + ylab("Proportion") # proportion of people in general good health decreases with time restless
 ```
+
+```{r}
+brfss2013_rest_genhlth %>% group_by(misrstls) %>% summarise(prop_poor_hlth = sum(gen_hlth == "Poor") / n())
+```
+
+From the statistics above (*prop_poor_hlth* : proportion of people in poor health), we may clearly see that the proportion of people feeling in poor general health is increasing with the number of restless days in the previous month.
 
 **Research question 2:**
 
@@ -85,9 +97,21 @@ brfss2013_prediab_bmi <- brfss2013 %>% filter(prediab1 != "NA") %>% filter(X_bmi
 ggplot(brfss2013_prediab_bmi, aes(x = prediab1, y = bmi)) + geom_boxplot() + facet_wrap(~sex) + xlab("Prediabetes condition") + ylab("BMI") # bmi slightly higher for prediabetes condition
 ```
 
+```{r}
+brfss2013_prediab_bmi %>% group_by(sex, prediab1) %>% summarise(median_bmi = median(bmi), iqr_bmi = IQR(bmi))
+```
+
+The statistics above (*median_bmi* : median of BMI, *iqr_bmi* : interquartile range of BMI) show that the median and interquartile range of the BMI are slightly higher when prediabetes condition is present for both males and females. However, we cannot rule out the possibility that these results happen by luck only.
+
 **Research question 3:**
 
 ```{r}
 brfss2013_pa_bmi <- brfss2013 %>% filter(pa1min_ != "NA") %>% filter(X_bmi5 != "NA") %>% mutate(bmi = X_bmi5 / 100)
 ggplot(brfss2013_pa_bmi, aes(x = bmi, y = log(pa1min_ + 1), colour = sex)) + geom_point(shape = 19, alpha = 1/4) + geom_smooth(method = lm, se = FALSE) + scale_colour_discrete(name = "Sex") + xlab("BMI") + ylab("Minutes of physical activity per week (Log)") # as bmi increases the number of total physical activity decreases
 ```
+
+```{r}
+brfss2013_pa_bmi %>% group_by(sex) %>% summarise(corr_bmi_phys_activity = cor(bmi, pa1min_))
+```
+
+The statistics above (*corr_bmi_phys_activity* : correlation of BMI and minutes of total physical activity per week) show a trend of doing less physical activity when BMI is higher for both males and females. Though, here again we cannot tell if this results from a real trend in the data or is merely happening by luck only.
